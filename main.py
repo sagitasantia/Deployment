@@ -1,28 +1,18 @@
 import streamlit as st
+from streamlit_option_menu import option_menu
 import pandas as pd
 import joblib
 from sklearn.cluster import KMeans
 import pickle
 import altair as alt
 
-# Set judul di sidebar
-st.sidebar.title("Daftar isi Language of New York City")
-# Icon untuk setiap opsi di sidebar
-icon_dict = {
-    "Top 10 Bahasa": "💻 Top 10 bahasa Umum",
-    "Bahasa Langka": "🔍 Top 10 bahasa Langka",
-    "Distribusi Jumlah Penutur Global": "🌐 Distribusi Jumlah Global Speakers",
-    "Hubungan Antara Jumlah Penutur Global dan Ukuran Bahasa": "📈 Hubungan Antara Jumlah Global_Speakers dan Size",
-    "Classifier": "🤖 Clustering"
-}
+st.sidebar.title("Language of New York City")
 
-# Tampilkan daftar isi di sidebar
-st.sidebar.markdown("### Daftar isi")
-selected_option = st.sidebar.radio(
-    "",
-    ["Top 10 Bahasa", "Bahasa Langka", "Distribusi Jumlah Penutur Global", "Hubungan Antara Jumlah Penutur Global dan Ukuran Bahasa", "Classifier"],
-    format_func=icon_dict.get
-)
+with st.sidebar:
+    selected_option = option_menu(
+        "Pilih opsi:",
+        ["💻 Top 10 Bahasa Umum", "🔍 Top 10 Bahasa Langka", "🌐 Distribusi Jumlah Global Speakers", "📈 Hubungan Antara Jumlah Global_Speakers dan Size", "🤖 Clustering"]
+    )
 
 st.header("DEPLOYMENT")
 st.title("TOP 10 LANGUAGE Of NEW YORK CITY and Classifier")
@@ -30,7 +20,7 @@ st.title("TOP 10 LANGUAGE Of NEW YORK CITY and Classifier")
 url = 'https://raw.githubusercontent.com/sagitasantia/Checkpoint/main/Data%20Language%20(1).csv'
 df = pd.read_csv(url, index_col=[0])
 
-if selected_option == "Top 10 Bahasa":
+if selected_option == "💻 Top 10 Bahasa Umum":
     st.write(df)
     st.subheader('Top 10 bahasa yang paling sering digunakan')
     top_10_languages = df['Language'].value_counts().head(10)
@@ -39,8 +29,11 @@ if selected_option == "Top 10 Bahasa":
         'Count': top_10_languages.values
     })
     st.bar_chart(top_10_languages_df.set_index('Language'))
+    st.title("Kesimpulan")
+    st.write("Bahasa yang paling banyak digunakan dari sepuluh yang disajikan adalah Language Lenape (Munsee) dengan jumlah penggunaan sebanyak 8 kali.")
 
-elif selected_option == "Bahasa Langka":
+
+elif selected_option == "🔍 Top 10 Bahasa Langka":
     st.write(df)
     st.subheader('10 bahasa yang jarang digunakan atau yang langka')
     bottom_10_languages = df['Language'].value_counts().tail(10)
@@ -49,8 +42,10 @@ elif selected_option == "Bahasa Langka":
         'Count': bottom_10_languages.values
     })
     st.bar_chart(bottom_10_languages_df.set_index('Language'))
+    st.title("Kesimpulan")
+    st.write("Semua bahasa-bahasa ini dikenal sebagai bahasa yang memiliki jumlah penutur yang sangat sedikit, dan beberapa di antaranya kemungkinan sudah punah atau sangat terancam punah.")
 
-elif selected_option == "Distribusi Jumlah Penutur Global":
+elif selected_option == "🌐 Distribusi Jumlah Global Speakers":
     st.subheader('Distribusi Jumlah Penutur Global')
     num_bins = st.slider('Number of Bins', min_value=5, max_value=50, value=20)
     histogram = alt.Chart(df).mark_bar(color='blue', opacity=0.7, stroke='black').encode(
@@ -62,8 +57,11 @@ elif selected_option == "Distribusi Jumlah Penutur Global":
         title='Distribution of Global Speakers'
     )
     st.write(histogram)
+    st.title("Kesimpulan")
+    st.write("Grup dengan 0 - 1.000.000 pembicara global menunjukkan frekuensi tertinggi, yang berarti ada lebih banyak kelompok bahasa dengan jumlah pembicara di rentang ini dibandingkan dengan rentang jumlah pembicara yang lain.")
 
-elif selected_option == "Hubungan Antara Jumlah Penutur Global dan Ukuran Bahasa":
+
+elif selected_option == "📈 Hubungan Antara Jumlah Global_Speakers dan Size":
     st.subheader('Hubungan antara Jumlah Penutur Global dan Ukuran Bahasa')
     scatter_plot_alt = alt.Chart(df).mark_circle(size=60).encode(
         x='Global Speakers',
@@ -74,8 +72,10 @@ elif selected_option == "Hubungan Antara Jumlah Penutur Global dan Ukuran Bahasa
         height=500
     ).interactive()
     st.altair_chart(scatter_plot_alt, use_container_width=True)
+    st.title("Kesimpulan")
+    st.write("Bahasa dengan jumlah penutur global yang lebih rendah cenderung dikategorikan dalam grup 'Small' dan 'Smallest'. Ini terlihat dari penyebaran titik-titik yang banyak berada di bagian kiri chart. Seiring meningkatnya jumlah penutur global, kategori ukuran bahasa juga cenderung meningkat, dengan beberapa bahasa masuk dalam kategori 'Medium' dan 'Large'. Terdapat beberapa bahasa dengan jumlah penutur yang sangat besar yang masuk dalam kategori 'Largest'. Data menunjukkan variasi yang lebar dalam setiap kategori ukuran, yang mengindikasikan bahwa tidak semua bahasa dengan jumlah penutur serupa memiliki ukuran yang sama.")
 
-elif selected_option == "Classifier":
+elif selected_option == "🤖 Clustering":
     st.subheader('Making Classifier')
     st.title('')
     file_path = 'kmeans_model.pkl'
@@ -101,11 +101,11 @@ elif selected_option == "Classifier":
     st.altair_chart(scatter_plot, use_container_width=True)
     df1['Cluster'] = kmeans.labels_
     st.write(df1)
-    global_speakers_input = st.number_input('Input Global Speakers')
-    size_input = st.number_input('Input Size')
-    status_input = st.number_input('Input Status')
-    global_speakers_category_input = st.number_input('Input Global Speakers Category')
-    submit_button = st.button('Submit')
+    global_speakers_input = st.sidebar.slider('Input Global Speakers', min_value=0.0, max_value=10000.0, value=5000.0)
+    size_input = st.sidebar.slider('Input Size', min_value=0.0, max_value=10000.0, value=500.0)
+    status_input = st.sidebar.slider('Input Status', min_value=0.0, max_value=10000.0, value=500.0)
+    global_speakers_category_input = st.sidebar.slider('Input Global Speakers Category', min_value=0.0, max_value=10000.0, value=500.0)
+    submit_button = st.sidebar.button('Submit')
     if submit_button:
         model = pickle.load(open("kmeans_model.pkl", "rb"))
         data = pd.DataFrame({
