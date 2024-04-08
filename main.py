@@ -47,7 +47,7 @@ elif selected_option == "🔍 Top 10 Bahasa Langka":
 
 elif selected_option == "🌐 Distribusi Jumlah Global Speakers":
     st.subheader('Distribusi Jumlah Penutur Global')
-    num_bins = st.slider('Number of Bins', min_value=5, max_value=50, value=20)
+    num_bins = st.number_input('Number of Bins', min_value=5, max_value=50, value=20)
     histogram = alt.Chart(df).mark_bar(color='blue', opacity=0.7, stroke='black').encode(
         alt.X('Global Speakers', bin=alt.Bin(maxbins=num_bins), title='Global Speakers'),
         alt.Y('count()', title='Frequency')
@@ -99,13 +99,13 @@ elif selected_option == "🤖 Clustering":
         height=500
     ).interactive()
     st.altair_chart(scatter_plot, use_container_width=True)
-    df1['Cluster'] = kmeans.labels_
     st.write(df1)
-    global_speakers_input = st.sidebar.slider('Input Global Speakers', min_value=0.0, max_value=10000.0, value=5000.0)
-    size_input = st.sidebar.slider('Input Size', min_value=0.0, max_value=10000.0, value=500.0)
-    status_input = st.sidebar.slider('Input Status', min_value=0.0, max_value=10000.0, value=500.0)
-    global_speakers_category_input = st.sidebar.slider('Input Global Speakers Category', min_value=0.0, max_value=10000.0, value=500.0)
-    submit_button = st.sidebar.button('Submit')
+    st.title("Masukkan data untuk prediksi")
+    global_speakers_input = st.number_input('Input Global Speakers', min_value=0.0, value=5000.0)
+    size_input = st.number_input('Input Size', min_value=0.0, value=500.0)
+    status_input = st.number_input('Input Status', min_value=0.0, value=500.0)
+    global_speakers_category_input = st.number_input('Input Global Speakers Category', min_value=0.0, value=500.0)
+    submit_button = st.button('Submit')
     if submit_button:
         model = pickle.load(open("kmeans_model.pkl", "rb"))
         data = pd.DataFrame({
